@@ -1,4 +1,4 @@
-var require = meteorInstall({"server":{"main.js":["meteor/meteor",function(require,exports,module){
+var require = meteorInstall({"server":{"main.js":function(){
 
 ///////////////////////////////////////////////////////////////////////
 //                                                                   //
@@ -6,16 +6,9 @@ var require = meteorInstall({"server":{"main.js":["meteor/meteor",function(requi
 //                                                                   //
 ///////////////////////////////////////////////////////////////////////
                                                                      //
-var Meteor = void 0;                                                 // 1
-module.importSync("meteor/meteor", {                                 // 1
-  Meteor: function (v) {                                             // 1
-    Meteor = v;                                                      // 1
-  }                                                                  // 1
-}, 0);                                                               // 1
-Meteor.startup(function () {// code to run on server at startup      // 3
-});                                                                  // 5
+Meteor.startup(function () {});                                      // 1
 ///////////////////////////////////////////////////////////////////////
 
-}]}},{"extensions":[".js",".json"]});
+}}},{"extensions":[".js",".json"]});
 require("./server/main.js");
 //# sourceMappingURL=app.js.map

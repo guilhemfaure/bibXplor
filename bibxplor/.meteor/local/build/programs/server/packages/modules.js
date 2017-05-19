@@ -133,6 +133,8 @@ install("blaze-html-templates");
 install("standard-minifier-css");
 install("standard-minifier-js");
 install("shell-server", "meteor/shell-server/main.js");
+install("url");
+install("http");
 install("livedata");
 install("hot-code-push");
 install("launch-screen");

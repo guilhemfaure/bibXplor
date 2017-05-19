@@ -1,1 +1,1 @@
-{"version":3,"sources":["meteor://💻app/app/client/main.css"],"names":[],"mappings":"AAAA","sourcesContent":["/* CSS declarations go here */\n"]}
+{"version":3,"sources":["meteor://💻app/app/client/main.css"],"names":[],"mappings":"AAAA;;AACA;EACE;EACA;;;AAGF;EACE;EACA","sourcesContent":["/* CSS declarations go here */\n.links line {\n  stroke: #999;\n  stroke-opacity: 0.6;\n}\n\n.nodes circle {\n  stroke: #fff;\n  stroke-width: 1.5px;\n}\n"]}

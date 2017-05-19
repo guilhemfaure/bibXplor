@@ -1,87 +1,1344 @@
-var require = meteorInstall({"client":{"main.html":["./template.main.js",function(require,exports,module){
+var require = meteorInstall({"client":{"template.main.js":function(){
 
-///////////////////////////////////////////////////////////////////////
-//                                                                   //
-// client/main.html                                                  //
-//                                                                   //
-///////////////////////////////////////////////////////////////////////
-                                                                     //
-module.exports = require("./template.main.js");                      // 1
-                                                                     // 2
-///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                //
+// client/template.main.js                                                                        //
+//                                                                                                //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                                                                  //
+                                                                                                  // 1
+Template.body.addContent((function() {                                                            // 2
+  var view = this;                                                                                // 3
+  return Spacebars.include(view.lookupTemplate("vis"));                                           // 4
+}));                                                                                              // 5
+Meteor.startup(Template.body.renderToDocument);                                                   // 6
+                                                                                                  // 7
+Template.__checkName("vis");                                                                      // 8
+Template["vis"] = new Template("Template.vis", (function() {                                      // 9
+  var view = this;                                                                                // 10
+  return HTML.Raw('<div id="circles"></div>');                                                    // 11
+}));                                                                                              // 12
+                                                                                                  // 13
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-}],"template.main.js":function(){
+},"main.js":["d3",function(require){
 
-///////////////////////////////////////////////////////////////////////
-//                                                                   //
-// client/template.main.js                                           //
-//                                                                   //
-///////////////////////////////////////////////////////////////////////
-                                                                     //
-                                                                     // 1
-Template.body.addContent((function() {                               // 2
-  var view = this;                                                   // 3
-  return [ HTML.Raw("<h1>Welcome to Meteor!</h1>\n\n  "), Spacebars.include(view.lookupTemplate("hello")), "\n  ", Spacebars.include(view.lookupTemplate("info")) ];
-}));                                                                 // 5
-Meteor.startup(Template.body.renderToDocument);                      // 6
-                                                                     // 7
-Template.__checkName("hello");                                       // 8
-Template["hello"] = new Template("Template.hello", (function() {     // 9
-  var view = this;                                                   // 10
-  return [ HTML.Raw("<button>Click Me</button>\n  "), HTML.P("You've pressed the button ", Blaze.View("lookup:counter", function() {
-    return Spacebars.mustache(view.lookup("counter"));               // 12
-  }), " times.") ];                                                  // 13
-}));                                                                 // 14
-                                                                     // 15
-Template.__checkName("info");                                        // 16
-Template["info"] = new Template("Template.info", (function() {       // 17
-  var view = this;                                                   // 18
-  return HTML.Raw('<h2>Learn Meteor!</h2>\n  <ul>\n    <li><a href="https://www.meteor.com/try" target="_blank">Do the Tutorial</a></li>\n    <li><a href="http://guide.meteor.com" target="_blank">Follow the Guide</a></li>\n    <li><a href="https://docs.meteor.com" target="_blank">Read the Docs</a></li>\n    <li><a href="https://forums.meteor.com" target="_blank">Discussions</a></li>\n  </ul>');
-}));                                                                 // 20
-                                                                     // 21
-///////////////////////////////////////////////////////////////////////
-
-},"main.js":["meteor/templating","meteor/reactive-var","./main.html",function(require,exports,module){
-
-///////////////////////////////////////////////////////////////////////
-//                                                                   //
-// client/main.js                                                    //
-//                                                                   //
-///////////////////////////////////////////////////////////////////////
-                                                                     //
-var Template = void 0;                                               // 1
-module.importSync("meteor/templating", {                             // 1
-  Template: function (v) {                                           // 1
-    Template = v;                                                    // 1
-  }                                                                  // 1
-}, 0);                                                               // 1
-var ReactiveVar = void 0;                                            // 1
-module.importSync("meteor/reactive-var", {                           // 1
-  ReactiveVar: function (v) {                                        // 1
-    ReactiveVar = v;                                                 // 1
-  }                                                                  // 1
-}, 1);                                                               // 1
-module.importSync("./main.html");                                    // 1
-Template.hello.onCreated(function () {                               // 6
-  function helloOnCreated() {                                        // 6
-    // counter starts at 0                                           // 7
-    this.counter = new ReactiveVar(0);                               // 8
-  }                                                                  // 9
-                                                                     //
-  return helloOnCreated;                                             // 6
-}());                                                                // 6
-Template.hello.helpers({                                             // 11
-  counter: function () {                                             // 12
-    return Template.instance().counter.get();                        // 13
-  }                                                                  // 14
-});                                                                  // 11
-Template.hello.events({                                              // 17
-  'click button': function (event, instance) {                       // 18
-    // increment the counter when button is clicked                  // 19
-    instance.counter.set(instance.counter.get() + 1);                // 20
-  }                                                                  // 21
-});                                                                  // 17
-///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                //
+// client/main.js                                                                                 //
+//                                                                                                //
+////////////////////////////////////////////////////////////////////////////////////////////////////
+                                                                                                  //
+var d3 = require("d3");                                                                           // 1
+                                                                                                  //
+Template.vis.rendered = function () {                                                             // 2
+  var svg,                                                                                        // 3
+      width = 960,                                                                                // 3
+      height = 600,                                                                               // 3
+      x;                                                                                          // 3
+  svg = d3.select('#circles').append('svg').attr('width', width).attr('height', height);          // 5
+  var color = d3.scaleOrdinal(d3.schemeCategory20);                                               // 9
+  var simulation = d3.forceSimulation().force("link", d3.forceLink().id(function (d) {            // 11
+    return d.id;                                                                                  // 12
+  })).force("charge", d3.forceManyBody()).force("center", d3.forceCenter(width / 2, height / 2));
+  graph = {                                                                                       // 16
+    "nodes": [{                                                                                   // 17
+      "id": "Myriel",                                                                             // 18
+      "group": 1                                                                                  // 18
+    }, {                                                                                          // 18
+      "id": "Napoleon",                                                                           // 19
+      "group": 1                                                                                  // 19
+    }, {                                                                                          // 19
+      "id": "Mlle.Baptistine",                                                                    // 20
+      "group": 1                                                                                  // 20
+    }, {                                                                                          // 20
+      "id": "Mme.Magloire",                                                                       // 21
+      "group": 1                                                                                  // 21
+    }, {                                                                                          // 21
+      "id": "CountessdeLo",                                                                       // 22
+      "group": 1                                                                                  // 22
+    }, {                                                                                          // 22
+      "id": "Geborand",                                                                           // 23
+      "group": 1                                                                                  // 23
+    }, {                                                                                          // 23
+      "id": "Champtercier",                                                                       // 24
+      "group": 1                                                                                  // 24
+    }, {                                                                                          // 24
+      "id": "Cravatte",                                                                           // 25
+      "group": 1                                                                                  // 25
+    }, {                                                                                          // 25
+      "id": "Count",                                                                              // 26
+      "group": 1                                                                                  // 26
+    }, {                                                                                          // 26
+      "id": "OldMan",                                                                             // 27
+      "group": 1                                                                                  // 27
+    }, {                                                                                          // 27
+      "id": "Labarre",                                                                            // 28
+      "group": 2                                                                                  // 28
+    }, {                                                                                          // 28
+      "id": "Valjean",                                                                            // 29
+      "group": 2                                                                                  // 29
+    }, {                                                                                          // 29
+      "id": "Marguerite",                                                                         // 30
+      "group": 3                                                                                  // 30
+    }, {                                                                                          // 30
+      "id": "Mme.deR",                                                                            // 31
+      "group": 2                                                                                  // 31
+    }, {                                                                                          // 31
+      "id": "Isabeau",                                                                            // 32
+      "group": 2                                                                                  // 32
+    }, {                                                                                          // 32
+      "id": "Gervais",                                                                            // 33
+      "group": 2                                                                                  // 33
+    }, {                                                                                          // 33
+      "id": "Tholomyes",                                                                          // 34
+      "group": 3                                                                                  // 34
+    }, {                                                                                          // 34
+      "id": "Listolier",                                                                          // 35
+      "group": 3                                                                                  // 35
+    }, {                                                                                          // 35
+      "id": "Fameuil",                                                                            // 36
+      "group": 3                                                                                  // 36
+    }, {                                                                                          // 36
+      "id": "Blacheville",                                                                        // 37
+      "group": 3                                                                                  // 37
+    }, {                                                                                          // 37
+      "id": "Favourite",                                                                          // 38
+      "group": 3                                                                                  // 38
+    }, {                                                                                          // 38
+      "id": "Dahlia",                                                                             // 39
+      "group": 3                                                                                  // 39
+    }, {                                                                                          // 39
+      "id": "Zephine",                                                                            // 40
+      "group": 3                                                                                  // 40
+    }, {                                                                                          // 40
+      "id": "Fantine",                                                                            // 41
+      "group": 3                                                                                  // 41
+    }, {                                                                                          // 41
+      "id": "Mme.Thenardier",                                                                     // 42
+      "group": 4                                                                                  // 42
+    }, {                                                                                          // 42
+      "id": "Thenardier",                                                                         // 43
+      "group": 4                                                                                  // 43
+    }, {                                                                                          // 43
+      "id": "Cosette",                                                                            // 44
+      "group": 5                                                                                  // 44
+    }, {                                                                                          // 44
+      "id": "Javert",                                                                             // 45
+      "group": 4                                                                                  // 45
+    }, {                                                                                          // 45
+      "id": "Fauchelevent",                                                                       // 46
+      "group": 0                                                                                  // 46
+    }, {                                                                                          // 46
+      "id": "Bamatabois",                                                                         // 47
+      "group": 2                                                                                  // 47
+    }, {                                                                                          // 47
+      "id": "Perpetue",                                                                           // 48
+      "group": 3                                                                                  // 48
+    }, {                                                                                          // 48
+      "id": "Simplice",                                                                           // 49
+      "group": 2                                                                                  // 49
+    }, {                                                                                          // 49
+      "id": "Scaufflaire",                                                                        // 50
+      "group": 2                                                                                  // 50
+    }, {                                                                                          // 50
+      "id": "Woman1",                                                                             // 51
+      "group": 2                                                                                  // 51
+    }, {                                                                                          // 51
+      "id": "Judge",                                                                              // 52
+      "group": 2                                                                                  // 52
+    }, {                                                                                          // 52
+      "id": "Champmathieu",                                                                       // 53
+      "group": 2                                                                                  // 53
+    }, {                                                                                          // 53
+      "id": "Brevet",                                                                             // 54
+      "group": 2                                                                                  // 54
+    }, {                                                                                          // 54
+      "id": "Chenildieu",                                                                         // 55
+      "group": 2                                                                                  // 55
+    }, {                                                                                          // 55
+      "id": "Cochepaille",                                                                        // 56
+      "group": 2                                                                                  // 56
+    }, {                                                                                          // 56
+      "id": "Pontmercy",                                                                          // 57
+      "group": 4                                                                                  // 57
+    }, {                                                                                          // 57
+      "id": "Boulatruelle",                                                                       // 58
+      "group": 6                                                                                  // 58
+    }, {                                                                                          // 58
+      "id": "Eponine",                                                                            // 59
+      "group": 4                                                                                  // 59
+    }, {                                                                                          // 59
+      "id": "Anzelma",                                                                            // 60
+      "group": 4                                                                                  // 60
+    }, {                                                                                          // 60
+      "id": "Woman2",                                                                             // 61
+      "group": 5                                                                                  // 61
+    }, {                                                                                          // 61
+      "id": "MotherInnocent",                                                                     // 62
+      "group": 0                                                                                  // 62
+    }, {                                                                                          // 62
+      "id": "Gribier",                                                                            // 63
+      "group": 0                                                                                  // 63
+    }, {                                                                                          // 63
+      "id": "Jondrette",                                                                          // 64
+      "group": 7                                                                                  // 64
+    }, {                                                                                          // 64
+      "id": "Mme.Burgon",                                                                         // 65
+      "group": 7                                                                                  // 65
+    }, {                                                                                          // 65
+      "id": "Gavroche",                                                                           // 66
+      "group": 8                                                                                  // 66
+    }, {                                                                                          // 66
+      "id": "Gillenormand",                                                                       // 67
+      "group": 5                                                                                  // 67
+    }, {                                                                                          // 67
+      "id": "Magnon",                                                                             // 68
+      "group": 5                                                                                  // 68
+    }, {                                                                                          // 68
+      "id": "Mlle.Gillenormand",                                                                  // 69
+      "group": 5                                                                                  // 69
+    }, {                                                                                          // 69
+      "id": "Mme.Pontmercy",                                                                      // 70
+      "group": 5                                                                                  // 70
+    }, {                                                                                          // 70
+      "id": "Mlle.Vaubois",                                                                       // 71
+      "group": 5                                                                                  // 71
+    }, {                                                                                          // 71
+      "id": "Lt.Gillenormand",                                                                    // 72
+      "group": 5                                                                                  // 72
+    }, {                                                                                          // 72
+      "id": "Marius",                                                                             // 73
+      "group": 8                                                                                  // 73
+    }, {                                                                                          // 73
+      "id": "BaronessT",                                                                          // 74
+      "group": 5                                                                                  // 74
+    }, {                                                                                          // 74
+      "id": "Mabeuf",                                                                             // 75
+      "group": 8                                                                                  // 75
+    }, {                                                                                          // 75
+      "id": "Enjolras",                                                                           // 76
+      "group": 8                                                                                  // 76
+    }, {                                                                                          // 76
+      "id": "Combeferre",                                                                         // 77
+      "group": 8                                                                                  // 77
+    }, {                                                                                          // 77
+      "id": "Prouvaire",                                                                          // 78
+      "group": 8                                                                                  // 78
+    }, {                                                                                          // 78
+      "id": "Feuilly",                                                                            // 79
+      "group": 8                                                                                  // 79
+    }, {                                                                                          // 79
+      "id": "Courfeyrac",                                                                         // 80
+      "group": 8                                                                                  // 80
+    }, {                                                                                          // 80
+      "id": "Bahorel",                                                                            // 81
+      "group": 8                                                                                  // 81
+    }, {                                                                                          // 81
+      "id": "Bossuet",                                                                            // 82
+      "group": 8                                                                                  // 82
+    }, {                                                                                          // 82
+      "id": "Joly",                                                                               // 83
+      "group": 8                                                                                  // 83
+    }, {                                                                                          // 83
+      "id": "Grantaire",                                                                          // 84
+      "group": 8                                                                                  // 84
+    }, {                                                                                          // 84
+      "id": "MotherPlutarch",                                                                     // 85
+      "group": 9                                                                                  // 85
+    }, {                                                                                          // 85
+      "id": "Gueulemer",                                                                          // 86
+      "group": 4                                                                                  // 86
+    }, {                                                                                          // 86
+      "id": "Babet",                                                                              // 87
+      "group": 4                                                                                  // 87
+    }, {                                                                                          // 87
+      "id": "Claquesous",                                                                         // 88
+      "group": 4                                                                                  // 88
+    }, {                                                                                          // 88
+      "id": "Montparnasse",                                                                       // 89
+      "group": 4                                                                                  // 89
+    }, {                                                                                          // 89
+      "id": "Toussaint",                                                                          // 90
+      "group": 5                                                                                  // 90
+    }, {                                                                                          // 90
+      "id": "Child1",                                                                             // 91
+      "group": 10                                                                                 // 91
+    }, {                                                                                          // 91
+      "id": "Child2",                                                                             // 92
+      "group": 10                                                                                 // 92
+    }, {                                                                                          // 92
+      "id": "Brujon",                                                                             // 93
+      "group": 4                                                                                  // 93
+    }, {                                                                                          // 93
+      "id": "Mme.Hucheloup",                                                                      // 94
+      "group": 8                                                                                  // 94
+    }],                                                                                           // 94
+    "links": [{                                                                                   // 96
+      "source": "Napoleon",                                                                       // 97
+      "target": "Myriel",                                                                         // 97
+      "value": 1                                                                                  // 97
+    }, {                                                                                          // 97
+      "source": "Mlle.Baptistine",                                                                // 98
+      "target": "Myriel",                                                                         // 98
+      "value": 8                                                                                  // 98
+    }, {                                                                                          // 98
+      "source": "Mme.Magloire",                                                                   // 99
+      "target": "Myriel",                                                                         // 99
+      "value": 10                                                                                 // 99
+    }, {                                                                                          // 99
+      "source": "Mme.Magloire",                                                                   // 100
+      "target": "Mlle.Baptistine",                                                                // 100
+      "value": 6                                                                                  // 100
+    }, {                                                                                          // 100
+      "source": "CountessdeLo",                                                                   // 101
+      "target": "Myriel",                                                                         // 101
+      "value": 1                                                                                  // 101
+    }, {                                                                                          // 101
+      "source": "Geborand",                                                                       // 102
+      "target": "Myriel",                                                                         // 102
+      "value": 1                                                                                  // 102
+    }, {                                                                                          // 102
+      "source": "Champtercier",                                                                   // 103
+      "target": "Myriel",                                                                         // 103
+      "value": 1                                                                                  // 103
+    }, {                                                                                          // 103
+      "source": "Cravatte",                                                                       // 104
+      "target": "Myriel",                                                                         // 104
+      "value": 1                                                                                  // 104
+    }, {                                                                                          // 104
+      "source": "Count",                                                                          // 105
+      "target": "Myriel",                                                                         // 105
+      "value": 2                                                                                  // 105
+    }, {                                                                                          // 105
+      "source": "OldMan",                                                                         // 106
+      "target": "Myriel",                                                                         // 106
+      "value": 1                                                                                  // 106
+    }, {                                                                                          // 106
+      "source": "Valjean",                                                                        // 107
+      "target": "Labarre",                                                                        // 107
+      "value": 1                                                                                  // 107
+    }, {                                                                                          // 107
+      "source": "Valjean",                                                                        // 108
+      "target": "Mme.Magloire",                                                                   // 108
+      "value": 3                                                                                  // 108
+    }, {                                                                                          // 108
+      "source": "Valjean",                                                                        // 109
+      "target": "Mlle.Baptistine",                                                                // 109
+      "value": 3                                                                                  // 109
+    }, {                                                                                          // 109
+      "source": "Valjean",                                                                        // 110
+      "target": "Myriel",                                                                         // 110
+      "value": 5                                                                                  // 110
+    }, {                                                                                          // 110
+      "source": "Marguerite",                                                                     // 111
+      "target": "Valjean",                                                                        // 111
+      "value": 1                                                                                  // 111
+    }, {                                                                                          // 111
+      "source": "Mme.deR",                                                                        // 112
+      "target": "Valjean",                                                                        // 112
+      "value": 1                                                                                  // 112
+    }, {                                                                                          // 112
+      "source": "Isabeau",                                                                        // 113
+      "target": "Valjean",                                                                        // 113
+      "value": 1                                                                                  // 113
+    }, {                                                                                          // 113
+      "source": "Gervais",                                                                        // 114
+      "target": "Valjean",                                                                        // 114
+      "value": 1                                                                                  // 114
+    }, {                                                                                          // 114
+      "source": "Listolier",                                                                      // 115
+      "target": "Tholomyes",                                                                      // 115
+      "value": 4                                                                                  // 115
+    }, {                                                                                          // 115
+      "source": "Fameuil",                                                                        // 116
+      "target": "Tholomyes",                                                                      // 116
+      "value": 4                                                                                  // 116
+    }, {                                                                                          // 116
+      "source": "Fameuil",                                                                        // 117
+      "target": "Listolier",                                                                      // 117
+      "value": 4                                                                                  // 117
+    }, {                                                                                          // 117
+      "source": "Blacheville",                                                                    // 118
+      "target": "Tholomyes",                                                                      // 118
+      "value": 4                                                                                  // 118
+    }, {                                                                                          // 118
+      "source": "Blacheville",                                                                    // 119
+      "target": "Listolier",                                                                      // 119
+      "value": 4                                                                                  // 119
+    }, {                                                                                          // 119
+      "source": "Blacheville",                                                                    // 120
+      "target": "Fameuil",                                                                        // 120
+      "value": 4                                                                                  // 120
+    }, {                                                                                          // 120
+      "source": "Favourite",                                                                      // 121
+      "target": "Tholomyes",                                                                      // 121
+      "value": 3                                                                                  // 121
+    }, {                                                                                          // 121
+      "source": "Favourite",                                                                      // 122
+      "target": "Listolier",                                                                      // 122
+      "value": 3                                                                                  // 122
+    }, {                                                                                          // 122
+      "source": "Favourite",                                                                      // 123
+      "target": "Fameuil",                                                                        // 123
+      "value": 3                                                                                  // 123
+    }, {                                                                                          // 123
+      "source": "Favourite",                                                                      // 124
+      "target": "Blacheville",                                                                    // 124
+      "value": 4                                                                                  // 124
+    }, {                                                                                          // 124
+      "source": "Dahlia",                                                                         // 125
+      "target": "Tholomyes",                                                                      // 125
+      "value": 3                                                                                  // 125
+    }, {                                                                                          // 125
+      "source": "Dahlia",                                                                         // 126
+      "target": "Listolier",                                                                      // 126
+      "value": 3                                                                                  // 126
+    }, {                                                                                          // 126
+      "source": "Dahlia",                                                                         // 127
+      "target": "Fameuil",                                                                        // 127
+      "value": 3                                                                                  // 127
+    }, {                                                                                          // 127
+      "source": "Dahlia",                                                                         // 128
+      "target": "Blacheville",                                                                    // 128
+      "value": 3                                                                                  // 128
+    }, {                                                                                          // 128
+      "source": "Dahlia",                                                                         // 129
+      "target": "Favourite",                                                                      // 129
+      "value": 5                                                                                  // 129
+    }, {                                                                                          // 129
+      "source": "Zephine",                                                                        // 130
+      "target": "Tholomyes",                                                                      // 130
+      "value": 3                                                                                  // 130
+    }, {                                                                                          // 130
+      "source": "Zephine",                                                                        // 131
+      "target": "Listolier",                                                                      // 131
+      "value": 3                                                                                  // 131
+    }, {                                                                                          // 131
+      "source": "Zephine",                                                                        // 132
+      "target": "Fameuil",                                                                        // 132
+      "value": 3                                                                                  // 132
+    }, {                                                                                          // 132
+      "source": "Zephine",                                                                        // 133
+      "target": "Blacheville",                                                                    // 133
+      "value": 3                                                                                  // 133
+    }, {                                                                                          // 133
+      "source": "Zephine",                                                                        // 134
+      "target": "Favourite",                                                                      // 134
+      "value": 4                                                                                  // 134
+    }, {                                                                                          // 134
+      "source": "Zephine",                                                                        // 135
+      "target": "Dahlia",                                                                         // 135
+      "value": 4                                                                                  // 135
+    }, {                                                                                          // 135
+      "source": "Fantine",                                                                        // 136
+      "target": "Tholomyes",                                                                      // 136
+      "value": 3                                                                                  // 136
+    }, {                                                                                          // 136
+      "source": "Fantine",                                                                        // 137
+      "target": "Listolier",                                                                      // 137
+      "value": 3                                                                                  // 137
+    }, {                                                                                          // 137
+      "source": "Fantine",                                                                        // 138
+      "target": "Fameuil",                                                                        // 138
+      "value": 3                                                                                  // 138
+    }, {                                                                                          // 138
+      "source": "Fantine",                                                                        // 139
+      "target": "Blacheville",                                                                    // 139
+      "value": 3                                                                                  // 139
+    }, {                                                                                          // 139
+      "source": "Fantine",                                                                        // 140
+      "target": "Favourite",                                                                      // 140
+      "value": 4                                                                                  // 140
+    }, {                                                                                          // 140
+      "source": "Fantine",                                                                        // 141
+      "target": "Dahlia",                                                                         // 141
+      "value": 4                                                                                  // 141
+    }, {                                                                                          // 141
+      "source": "Fantine",                                                                        // 142
+      "target": "Zephine",                                                                        // 142
+      "value": 4                                                                                  // 142
+    }, {                                                                                          // 142
+      "source": "Fantine",                                                                        // 143
+      "target": "Marguerite",                                                                     // 143
+      "value": 2                                                                                  // 143
+    }, {                                                                                          // 143
+      "source": "Fantine",                                                                        // 144
+      "target": "Valjean",                                                                        // 144
+      "value": 9                                                                                  // 144
+    }, {                                                                                          // 144
+      "source": "Mme.Thenardier",                                                                 // 145
+      "target": "Fantine",                                                                        // 145
+      "value": 2                                                                                  // 145
+    }, {                                                                                          // 145
+      "source": "Mme.Thenardier",                                                                 // 146
+      "target": "Valjean",                                                                        // 146
+      "value": 7                                                                                  // 146
+    }, {                                                                                          // 146
+      "source": "Thenardier",                                                                     // 147
+      "target": "Mme.Thenardier",                                                                 // 147
+      "value": 13                                                                                 // 147
+    }, {                                                                                          // 147
+      "source": "Thenardier",                                                                     // 148
+      "target": "Fantine",                                                                        // 148
+      "value": 1                                                                                  // 148
+    }, {                                                                                          // 148
+      "source": "Thenardier",                                                                     // 149
+      "target": "Valjean",                                                                        // 149
+      "value": 12                                                                                 // 149
+    }, {                                                                                          // 149
+      "source": "Cosette",                                                                        // 150
+      "target": "Mme.Thenardier",                                                                 // 150
+      "value": 4                                                                                  // 150
+    }, {                                                                                          // 150
+      "source": "Cosette",                                                                        // 151
+      "target": "Valjean",                                                                        // 151
+      "value": 31                                                                                 // 151
+    }, {                                                                                          // 151
+      "source": "Cosette",                                                                        // 152
+      "target": "Tholomyes",                                                                      // 152
+      "value": 1                                                                                  // 152
+    }, {                                                                                          // 152
+      "source": "Cosette",                                                                        // 153
+      "target": "Thenardier",                                                                     // 153
+      "value": 1                                                                                  // 153
+    }, {                                                                                          // 153
+      "source": "Javert",                                                                         // 154
+      "target": "Valjean",                                                                        // 154
+      "value": 17                                                                                 // 154
+    }, {                                                                                          // 154
+      "source": "Javert",                                                                         // 155
+      "target": "Fantine",                                                                        // 155
+      "value": 5                                                                                  // 155
+    }, {                                                                                          // 155
+      "source": "Javert",                                                                         // 156
+      "target": "Thenardier",                                                                     // 156
+      "value": 5                                                                                  // 156
+    }, {                                                                                          // 156
+      "source": "Javert",                                                                         // 157
+      "target": "Mme.Thenardier",                                                                 // 157
+      "value": 1                                                                                  // 157
+    }, {                                                                                          // 157
+      "source": "Javert",                                                                         // 158
+      "target": "Cosette",                                                                        // 158
+      "value": 1                                                                                  // 158
+    }, {                                                                                          // 158
+      "source": "Fauchelevent",                                                                   // 159
+      "target": "Valjean",                                                                        // 159
+      "value": 8                                                                                  // 159
+    }, {                                                                                          // 159
+      "source": "Fauchelevent",                                                                   // 160
+      "target": "Javert",                                                                         // 160
+      "value": 1                                                                                  // 160
+    }, {                                                                                          // 160
+      "source": "Bamatabois",                                                                     // 161
+      "target": "Fantine",                                                                        // 161
+      "value": 1                                                                                  // 161
+    }, {                                                                                          // 161
+      "source": "Bamatabois",                                                                     // 162
+      "target": "Javert",                                                                         // 162
+      "value": 1                                                                                  // 162
+    }, {                                                                                          // 162
+      "source": "Bamatabois",                                                                     // 163
+      "target": "Valjean",                                                                        // 163
+      "value": 2                                                                                  // 163
+    }, {                                                                                          // 163
+      "source": "Perpetue",                                                                       // 164
+      "target": "Fantine",                                                                        // 164
+      "value": 1                                                                                  // 164
+    }, {                                                                                          // 164
+      "source": "Simplice",                                                                       // 165
+      "target": "Perpetue",                                                                       // 165
+      "value": 2                                                                                  // 165
+    }, {                                                                                          // 165
+      "source": "Simplice",                                                                       // 166
+      "target": "Valjean",                                                                        // 166
+      "value": 3                                                                                  // 166
+    }, {                                                                                          // 166
+      "source": "Simplice",                                                                       // 167
+      "target": "Fantine",                                                                        // 167
+      "value": 2                                                                                  // 167
+    }, {                                                                                          // 167
+      "source": "Simplice",                                                                       // 168
+      "target": "Javert",                                                                         // 168
+      "value": 1                                                                                  // 168
+    }, {                                                                                          // 168
+      "source": "Scaufflaire",                                                                    // 169
+      "target": "Valjean",                                                                        // 169
+      "value": 1                                                                                  // 169
+    }, {                                                                                          // 169
+      "source": "Woman1",                                                                         // 170
+      "target": "Valjean",                                                                        // 170
+      "value": 2                                                                                  // 170
+    }, {                                                                                          // 170
+      "source": "Woman1",                                                                         // 171
+      "target": "Javert",                                                                         // 171
+      "value": 1                                                                                  // 171
+    }, {                                                                                          // 171
+      "source": "Judge",                                                                          // 172
+      "target": "Valjean",                                                                        // 172
+      "value": 3                                                                                  // 172
+    }, {                                                                                          // 172
+      "source": "Judge",                                                                          // 173
+      "target": "Bamatabois",                                                                     // 173
+      "value": 2                                                                                  // 173
+    }, {                                                                                          // 173
+      "source": "Champmathieu",                                                                   // 174
+      "target": "Valjean",                                                                        // 174
+      "value": 3                                                                                  // 174
+    }, {                                                                                          // 174
+      "source": "Champmathieu",                                                                   // 175
+      "target": "Judge",                                                                          // 175
+      "value": 3                                                                                  // 175
+    }, {                                                                                          // 175
+      "source": "Champmathieu",                                                                   // 176
+      "target": "Bamatabois",                                                                     // 176
+      "value": 2                                                                                  // 176
+    }, {                                                                                          // 176
+      "source": "Brevet",                                                                         // 177
+      "target": "Judge",                                                                          // 177
+      "value": 2                                                                                  // 177
+    }, {                                                                                          // 177
+      "source": "Brevet",                                                                         // 178
+      "target": "Champmathieu",                                                                   // 178
+      "value": 2                                                                                  // 178
+    }, {                                                                                          // 178
+      "source": "Brevet",                                                                         // 179
+      "target": "Valjean",                                                                        // 179
+      "value": 2                                                                                  // 179
+    }, {                                                                                          // 179
+      "source": "Brevet",                                                                         // 180
+      "target": "Bamatabois",                                                                     // 180
+      "value": 1                                                                                  // 180
+    }, {                                                                                          // 180
+      "source": "Chenildieu",                                                                     // 181
+      "target": "Judge",                                                                          // 181
+      "value": 2                                                                                  // 181
+    }, {                                                                                          // 181
+      "source": "Chenildieu",                                                                     // 182
+      "target": "Champmathieu",                                                                   // 182
+      "value": 2                                                                                  // 182
+    }, {                                                                                          // 182
+      "source": "Chenildieu",                                                                     // 183
+      "target": "Brevet",                                                                         // 183
+      "value": 2                                                                                  // 183
+    }, {                                                                                          // 183
+      "source": "Chenildieu",                                                                     // 184
+      "target": "Valjean",                                                                        // 184
+      "value": 2                                                                                  // 184
+    }, {                                                                                          // 184
+      "source": "Chenildieu",                                                                     // 185
+      "target": "Bamatabois",                                                                     // 185
+      "value": 1                                                                                  // 185
+    }, {                                                                                          // 185
+      "source": "Cochepaille",                                                                    // 186
+      "target": "Judge",                                                                          // 186
+      "value": 2                                                                                  // 186
+    }, {                                                                                          // 186
+      "source": "Cochepaille",                                                                    // 187
+      "target": "Champmathieu",                                                                   // 187
+      "value": 2                                                                                  // 187
+    }, {                                                                                          // 187
+      "source": "Cochepaille",                                                                    // 188
+      "target": "Brevet",                                                                         // 188
+      "value": 2                                                                                  // 188
+    }, {                                                                                          // 188
+      "source": "Cochepaille",                                                                    // 189
+      "target": "Chenildieu",                                                                     // 189
+      "value": 2                                                                                  // 189
+    }, {                                                                                          // 189
+      "source": "Cochepaille",                                                                    // 190
+      "target": "Valjean",                                                                        // 190
+      "value": 2                                                                                  // 190
+    }, {                                                                                          // 190
+      "source": "Cochepaille",                                                                    // 191
+      "target": "Bamatabois",                                                                     // 191
+      "value": 1                                                                                  // 191
+    }, {                                                                                          // 191
+      "source": "Pontmercy",                                                                      // 192
+      "target": "Thenardier",                                                                     // 192
+      "value": 1                                                                                  // 192
+    }, {                                                                                          // 192
+      "source": "Boulatruelle",                                                                   // 193
+      "target": "Thenardier",                                                                     // 193
+      "value": 1                                                                                  // 193
+    }, {                                                                                          // 193
+      "source": "Eponine",                                                                        // 194
+      "target": "Mme.Thenardier",                                                                 // 194
+      "value": 2                                                                                  // 194
+    }, {                                                                                          // 194
+      "source": "Eponine",                                                                        // 195
+      "target": "Thenardier",                                                                     // 195
+      "value": 3                                                                                  // 195
+    }, {                                                                                          // 195
+      "source": "Anzelma",                                                                        // 196
+      "target": "Eponine",                                                                        // 196
+      "value": 2                                                                                  // 196
+    }, {                                                                                          // 196
+      "source": "Anzelma",                                                                        // 197
+      "target": "Thenardier",                                                                     // 197
+      "value": 2                                                                                  // 197
+    }, {                                                                                          // 197
+      "source": "Anzelma",                                                                        // 198
+      "target": "Mme.Thenardier",                                                                 // 198
+      "value": 1                                                                                  // 198
+    }, {                                                                                          // 198
+      "source": "Woman2",                                                                         // 199
+      "target": "Valjean",                                                                        // 199
+      "value": 3                                                                                  // 199
+    }, {                                                                                          // 199
+      "source": "Woman2",                                                                         // 200
+      "target": "Cosette",                                                                        // 200
+      "value": 1                                                                                  // 200
+    }, {                                                                                          // 200
+      "source": "Woman2",                                                                         // 201
+      "target": "Javert",                                                                         // 201
+      "value": 1                                                                                  // 201
+    }, {                                                                                          // 201
+      "source": "MotherInnocent",                                                                 // 202
+      "target": "Fauchelevent",                                                                   // 202
+      "value": 3                                                                                  // 202
+    }, {                                                                                          // 202
+      "source": "MotherInnocent",                                                                 // 203
+      "target": "Valjean",                                                                        // 203
+      "value": 1                                                                                  // 203
+    }, {                                                                                          // 203
+      "source": "Gribier",                                                                        // 204
+      "target": "Fauchelevent",                                                                   // 204
+      "value": 2                                                                                  // 204
+    }, {                                                                                          // 204
+      "source": "Mme.Burgon",                                                                     // 205
+      "target": "Jondrette",                                                                      // 205
+      "value": 1                                                                                  // 205
+    }, {                                                                                          // 205
+      "source": "Gavroche",                                                                       // 206
+      "target": "Mme.Burgon",                                                                     // 206
+      "value": 2                                                                                  // 206
+    }, {                                                                                          // 206
+      "source": "Gavroche",                                                                       // 207
+      "target": "Thenardier",                                                                     // 207
+      "value": 1                                                                                  // 207
+    }, {                                                                                          // 207
+      "source": "Gavroche",                                                                       // 208
+      "target": "Javert",                                                                         // 208
+      "value": 1                                                                                  // 208
+    }, {                                                                                          // 208
+      "source": "Gavroche",                                                                       // 209
+      "target": "Valjean",                                                                        // 209
+      "value": 1                                                                                  // 209
+    }, {                                                                                          // 209
+      "source": "Gillenormand",                                                                   // 210
+      "target": "Cosette",                                                                        // 210
+      "value": 3                                                                                  // 210
+    }, {                                                                                          // 210
+      "source": "Gillenormand",                                                                   // 211
+      "target": "Valjean",                                                                        // 211
+      "value": 2                                                                                  // 211
+    }, {                                                                                          // 211
+      "source": "Magnon",                                                                         // 212
+      "target": "Gillenormand",                                                                   // 212
+      "value": 1                                                                                  // 212
+    }, {                                                                                          // 212
+      "source": "Magnon",                                                                         // 213
+      "target": "Mme.Thenardier",                                                                 // 213
+      "value": 1                                                                                  // 213
+    }, {                                                                                          // 213
+      "source": "Mlle.Gillenormand",                                                              // 214
+      "target": "Gillenormand",                                                                   // 214
+      "value": 9                                                                                  // 214
+    }, {                                                                                          // 214
+      "source": "Mlle.Gillenormand",                                                              // 215
+      "target": "Cosette",                                                                        // 215
+      "value": 2                                                                                  // 215
+    }, {                                                                                          // 215
+      "source": "Mlle.Gillenormand",                                                              // 216
+      "target": "Valjean",                                                                        // 216
+      "value": 2                                                                                  // 216
+    }, {                                                                                          // 216
+      "source": "Mme.Pontmercy",                                                                  // 217
+      "target": "Mlle.Gillenormand",                                                              // 217
+      "value": 1                                                                                  // 217
+    }, {                                                                                          // 217
+      "source": "Mme.Pontmercy",                                                                  // 218
+      "target": "Pontmercy",                                                                      // 218
+      "value": 1                                                                                  // 218
+    }, {                                                                                          // 218
+      "source": "Mlle.Vaubois",                                                                   // 219
+      "target": "Mlle.Gillenormand",                                                              // 219
+      "value": 1                                                                                  // 219
+    }, {                                                                                          // 219
+      "source": "Lt.Gillenormand",                                                                // 220
+      "target": "Mlle.Gillenormand",                                                              // 220
+      "value": 2                                                                                  // 220
+    }, {                                                                                          // 220
+      "source": "Lt.Gillenormand",                                                                // 221
+      "target": "Gillenormand",                                                                   // 221
+      "value": 1                                                                                  // 221
+    }, {                                                                                          // 221
+      "source": "Lt.Gillenormand",                                                                // 222
+      "target": "Cosette",                                                                        // 222
+      "value": 1                                                                                  // 222
+    }, {                                                                                          // 222
+      "source": "Marius",                                                                         // 223
+      "target": "Mlle.Gillenormand",                                                              // 223
+      "value": 6                                                                                  // 223
+    }, {                                                                                          // 223
+      "source": "Marius",                                                                         // 224
+      "target": "Gillenormand",                                                                   // 224
+      "value": 12                                                                                 // 224
+    }, {                                                                                          // 224
+      "source": "Marius",                                                                         // 225
+      "target": "Pontmercy",                                                                      // 225
+      "value": 1                                                                                  // 225
+    }, {                                                                                          // 225
+      "source": "Marius",                                                                         // 226
+      "target": "Lt.Gillenormand",                                                                // 226
+      "value": 1                                                                                  // 226
+    }, {                                                                                          // 226
+      "source": "Marius",                                                                         // 227
+      "target": "Cosette",                                                                        // 227
+      "value": 21                                                                                 // 227
+    }, {                                                                                          // 227
+      "source": "Marius",                                                                         // 228
+      "target": "Valjean",                                                                        // 228
+      "value": 19                                                                                 // 228
+    }, {                                                                                          // 228
+      "source": "Marius",                                                                         // 229
+      "target": "Tholomyes",                                                                      // 229
+      "value": 1                                                                                  // 229
+    }, {                                                                                          // 229
+      "source": "Marius",                                                                         // 230
+      "target": "Thenardier",                                                                     // 230
+      "value": 2                                                                                  // 230
+    }, {                                                                                          // 230
+      "source": "Marius",                                                                         // 231
+      "target": "Eponine",                                                                        // 231
+      "value": 5                                                                                  // 231
+    }, {                                                                                          // 231
+      "source": "Marius",                                                                         // 232
+      "target": "Gavroche",                                                                       // 232
+      "value": 4                                                                                  // 232
+    }, {                                                                                          // 232
+      "source": "BaronessT",                                                                      // 233
+      "target": "Gillenormand",                                                                   // 233
+      "value": 1                                                                                  // 233
+    }, {                                                                                          // 233
+      "source": "BaronessT",                                                                      // 234
+      "target": "Marius",                                                                         // 234
+      "value": 1                                                                                  // 234
+    }, {                                                                                          // 234
+      "source": "Mabeuf",                                                                         // 235
+      "target": "Marius",                                                                         // 235
+      "value": 1                                                                                  // 235
+    }, {                                                                                          // 235
+      "source": "Mabeuf",                                                                         // 236
+      "target": "Eponine",                                                                        // 236
+      "value": 1                                                                                  // 236
+    }, {                                                                                          // 236
+      "source": "Mabeuf",                                                                         // 237
+      "target": "Gavroche",                                                                       // 237
+      "value": 1                                                                                  // 237
+    }, {                                                                                          // 237
+      "source": "Enjolras",                                                                       // 238
+      "target": "Marius",                                                                         // 238
+      "value": 7                                                                                  // 238
+    }, {                                                                                          // 238
+      "source": "Enjolras",                                                                       // 239
+      "target": "Gavroche",                                                                       // 239
+      "value": 7                                                                                  // 239
+    }, {                                                                                          // 239
+      "source": "Enjolras",                                                                       // 240
+      "target": "Javert",                                                                         // 240
+      "value": 6                                                                                  // 240
+    }, {                                                                                          // 240
+      "source": "Enjolras",                                                                       // 241
+      "target": "Mabeuf",                                                                         // 241
+      "value": 1                                                                                  // 241
+    }, {                                                                                          // 241
+      "source": "Enjolras",                                                                       // 242
+      "target": "Valjean",                                                                        // 242
+      "value": 4                                                                                  // 242
+    }, {                                                                                          // 242
+      "source": "Combeferre",                                                                     // 243
+      "target": "Enjolras",                                                                       // 243
+      "value": 15                                                                                 // 243
+    }, {                                                                                          // 243
+      "source": "Combeferre",                                                                     // 244
+      "target": "Marius",                                                                         // 244
+      "value": 5                                                                                  // 244
+    }, {                                                                                          // 244
+      "source": "Combeferre",                                                                     // 245
+      "target": "Gavroche",                                                                       // 245
+      "value": 6                                                                                  // 245
+    }, {                                                                                          // 245
+      "source": "Combeferre",                                                                     // 246
+      "target": "Mabeuf",                                                                         // 246
+      "value": 2                                                                                  // 246
+    }, {                                                                                          // 246
+      "source": "Prouvaire",                                                                      // 247
+      "target": "Gavroche",                                                                       // 247
+      "value": 1                                                                                  // 247
+    }, {                                                                                          // 247
+      "source": "Prouvaire",                                                                      // 248
+      "target": "Enjolras",                                                                       // 248
+      "value": 4                                                                                  // 248
+    }, {                                                                                          // 248
+      "source": "Prouvaire",                                                                      // 249
+      "target": "Combeferre",                                                                     // 249
+      "value": 2                                                                                  // 249
+    }, {                                                                                          // 249
+      "source": "Feuilly",                                                                        // 250
+      "target": "Gavroche",                                                                       // 250
+      "value": 2                                                                                  // 250
+    }, {                                                                                          // 250
+      "source": "Feuilly",                                                                        // 251
+      "target": "Enjolras",                                                                       // 251
+      "value": 6                                                                                  // 251
+    }, {                                                                                          // 251
+      "source": "Feuilly",                                                                        // 252
+      "target": "Prouvaire",                                                                      // 252
+      "value": 2                                                                                  // 252
+    }, {                                                                                          // 252
+      "source": "Feuilly",                                                                        // 253
+      "target": "Combeferre",                                                                     // 253
+      "value": 5                                                                                  // 253
+    }, {                                                                                          // 253
+      "source": "Feuilly",                                                                        // 254
+      "target": "Mabeuf",                                                                         // 254
+      "value": 1                                                                                  // 254
+    }, {                                                                                          // 254
+      "source": "Feuilly",                                                                        // 255
+      "target": "Marius",                                                                         // 255
+      "value": 1                                                                                  // 255
+    }, {                                                                                          // 255
+      "source": "Courfeyrac",                                                                     // 256
+      "target": "Marius",                                                                         // 256
+      "value": 9                                                                                  // 256
+    }, {                                                                                          // 256
+      "source": "Courfeyrac",                                                                     // 257
+      "target": "Enjolras",                                                                       // 257
+      "value": 17                                                                                 // 257
+    }, {                                                                                          // 257
+      "source": "Courfeyrac",                                                                     // 258
+      "target": "Combeferre",                                                                     // 258
+      "value": 13                                                                                 // 258
+    }, {                                                                                          // 258
+      "source": "Courfeyrac",                                                                     // 259
+      "target": "Gavroche",                                                                       // 259
+      "value": 7                                                                                  // 259
+    }, {                                                                                          // 259
+      "source": "Courfeyrac",                                                                     // 260
+      "target": "Mabeuf",                                                                         // 260
+      "value": 2                                                                                  // 260
+    }, {                                                                                          // 260
+      "source": "Courfeyrac",                                                                     // 261
+      "target": "Eponine",                                                                        // 261
+      "value": 1                                                                                  // 261
+    }, {                                                                                          // 261
+      "source": "Courfeyrac",                                                                     // 262
+      "target": "Feuilly",                                                                        // 262
+      "value": 6                                                                                  // 262
+    }, {                                                                                          // 262
+      "source": "Courfeyrac",                                                                     // 263
+      "target": "Prouvaire",                                                                      // 263
+      "value": 3                                                                                  // 263
+    }, {                                                                                          // 263
+      "source": "Bahorel",                                                                        // 264
+      "target": "Combeferre",                                                                     // 264
+      "value": 5                                                                                  // 264
+    }, {                                                                                          // 264
+      "source": "Bahorel",                                                                        // 265
+      "target": "Gavroche",                                                                       // 265
+      "value": 5                                                                                  // 265
+    }, {                                                                                          // 265
+      "source": "Bahorel",                                                                        // 266
+      "target": "Courfeyrac",                                                                     // 266
+      "value": 6                                                                                  // 266
+    }, {                                                                                          // 266
+      "source": "Bahorel",                                                                        // 267
+      "target": "Mabeuf",                                                                         // 267
+      "value": 2                                                                                  // 267
+    }, {                                                                                          // 267
+      "source": "Bahorel",                                                                        // 268
+      "target": "Enjolras",                                                                       // 268
+      "value": 4                                                                                  // 268
+    }, {                                                                                          // 268
+      "source": "Bahorel",                                                                        // 269
+      "target": "Feuilly",                                                                        // 269
+      "value": 3                                                                                  // 269
+    }, {                                                                                          // 269
+      "source": "Bahorel",                                                                        // 270
+      "target": "Prouvaire",                                                                      // 270
+      "value": 2                                                                                  // 270
+    }, {                                                                                          // 270
+      "source": "Bahorel",                                                                        // 271
+      "target": "Marius",                                                                         // 271
+      "value": 1                                                                                  // 271
+    }, {                                                                                          // 271
+      "source": "Bossuet",                                                                        // 272
+      "target": "Marius",                                                                         // 272
+      "value": 5                                                                                  // 272
+    }, {                                                                                          // 272
+      "source": "Bossuet",                                                                        // 273
+      "target": "Courfeyrac",                                                                     // 273
+      "value": 12                                                                                 // 273
+    }, {                                                                                          // 273
+      "source": "Bossuet",                                                                        // 274
+      "target": "Gavroche",                                                                       // 274
+      "value": 5                                                                                  // 274
+    }, {                                                                                          // 274
+      "source": "Bossuet",                                                                        // 275
+      "target": "Bahorel",                                                                        // 275
+      "value": 4                                                                                  // 275
+    }, {                                                                                          // 275
+      "source": "Bossuet",                                                                        // 276
+      "target": "Enjolras",                                                                       // 276
+      "value": 10                                                                                 // 276
+    }, {                                                                                          // 276
+      "source": "Bossuet",                                                                        // 277
+      "target": "Feuilly",                                                                        // 277
+      "value": 6                                                                                  // 277
+    }, {                                                                                          // 277
+      "source": "Bossuet",                                                                        // 278
+      "target": "Prouvaire",                                                                      // 278
+      "value": 2                                                                                  // 278
+    }, {                                                                                          // 278
+      "source": "Bossuet",                                                                        // 279
+      "target": "Combeferre",                                                                     // 279
+      "value": 9                                                                                  // 279
+    }, {                                                                                          // 279
+      "source": "Bossuet",                                                                        // 280
+      "target": "Mabeuf",                                                                         // 280
+      "value": 1                                                                                  // 280
+    }, {                                                                                          // 280
+      "source": "Bossuet",                                                                        // 281
+      "target": "Valjean",                                                                        // 281
+      "value": 1                                                                                  // 281
+    }, {                                                                                          // 281
+      "source": "Joly",                                                                           // 282
+      "target": "Bahorel",                                                                        // 282
+      "value": 5                                                                                  // 282
+    }, {                                                                                          // 282
+      "source": "Joly",                                                                           // 283
+      "target": "Bossuet",                                                                        // 283
+      "value": 7                                                                                  // 283
+    }, {                                                                                          // 283
+      "source": "Joly",                                                                           // 284
+      "target": "Gavroche",                                                                       // 284
+      "value": 3                                                                                  // 284
+    }, {                                                                                          // 284
+      "source": "Joly",                                                                           // 285
+      "target": "Courfeyrac",                                                                     // 285
+      "value": 5                                                                                  // 285
+    }, {                                                                                          // 285
+      "source": "Joly",                                                                           // 286
+      "target": "Enjolras",                                                                       // 286
+      "value": 5                                                                                  // 286
+    }, {                                                                                          // 286
+      "source": "Joly",                                                                           // 287
+      "target": "Feuilly",                                                                        // 287
+      "value": 5                                                                                  // 287
+    }, {                                                                                          // 287
+      "source": "Joly",                                                                           // 288
+      "target": "Prouvaire",                                                                      // 288
+      "value": 2                                                                                  // 288
+    }, {                                                                                          // 288
+      "source": "Joly",                                                                           // 289
+      "target": "Combeferre",                                                                     // 289
+      "value": 5                                                                                  // 289
+    }, {                                                                                          // 289
+      "source": "Joly",                                                                           // 290
+      "target": "Mabeuf",                                                                         // 290
+      "value": 1                                                                                  // 290
+    }, {                                                                                          // 290
+      "source": "Joly",                                                                           // 291
+      "target": "Marius",                                                                         // 291
+      "value": 2                                                                                  // 291
+    }, {                                                                                          // 291
+      "source": "Grantaire",                                                                      // 292
+      "target": "Bossuet",                                                                        // 292
+      "value": 3                                                                                  // 292
+    }, {                                                                                          // 292
+      "source": "Grantaire",                                                                      // 293
+      "target": "Enjolras",                                                                       // 293
+      "value": 3                                                                                  // 293
+    }, {                                                                                          // 293
+      "source": "Grantaire",                                                                      // 294
+      "target": "Combeferre",                                                                     // 294
+      "value": 1                                                                                  // 294
+    }, {                                                                                          // 294
+      "source": "Grantaire",                                                                      // 295
+      "target": "Courfeyrac",                                                                     // 295
+      "value": 2                                                                                  // 295
+    }, {                                                                                          // 295
+      "source": "Grantaire",                                                                      // 296
+      "target": "Joly",                                                                           // 296
+      "value": 2                                                                                  // 296
+    }, {                                                                                          // 296
+      "source": "Grantaire",                                                                      // 297
+      "target": "Gavroche",                                                                       // 297
+      "value": 1                                                                                  // 297
+    }, {                                                                                          // 297
+      "source": "Grantaire",                                                                      // 298
+      "target": "Bahorel",                                                                        // 298
+      "value": 1                                                                                  // 298
+    }, {                                                                                          // 298
+      "source": "Grantaire",                                                                      // 299
+      "target": "Feuilly",                                                                        // 299
+      "value": 1                                                                                  // 299
+    }, {                                                                                          // 299
+      "source": "Grantaire",                                                                      // 300
+      "target": "Prouvaire",                                                                      // 300
+      "value": 1                                                                                  // 300
+    }, {                                                                                          // 300
+      "source": "MotherPlutarch",                                                                 // 301
+      "target": "Mabeuf",                                                                         // 301
+      "value": 3                                                                                  // 301
+    }, {                                                                                          // 301
+      "source": "Gueulemer",                                                                      // 302
+      "target": "Thenardier",                                                                     // 302
+      "value": 5                                                                                  // 302
+    }, {                                                                                          // 302
+      "source": "Gueulemer",                                                                      // 303
+      "target": "Valjean",                                                                        // 303
+      "value": 1                                                                                  // 303
+    }, {                                                                                          // 303
+      "source": "Gueulemer",                                                                      // 304
+      "target": "Mme.Thenardier",                                                                 // 304
+      "value": 1                                                                                  // 304
+    }, {                                                                                          // 304
+      "source": "Gueulemer",                                                                      // 305
+      "target": "Javert",                                                                         // 305
+      "value": 1                                                                                  // 305
+    }, {                                                                                          // 305
+      "source": "Gueulemer",                                                                      // 306
+      "target": "Gavroche",                                                                       // 306
+      "value": 1                                                                                  // 306
+    }, {                                                                                          // 306
+      "source": "Gueulemer",                                                                      // 307
+      "target": "Eponine",                                                                        // 307
+      "value": 1                                                                                  // 307
+    }, {                                                                                          // 307
+      "source": "Babet",                                                                          // 308
+      "target": "Thenardier",                                                                     // 308
+      "value": 6                                                                                  // 308
+    }, {                                                                                          // 308
+      "source": "Babet",                                                                          // 309
+      "target": "Gueulemer",                                                                      // 309
+      "value": 6                                                                                  // 309
+    }, {                                                                                          // 309
+      "source": "Babet",                                                                          // 310
+      "target": "Valjean",                                                                        // 310
+      "value": 1                                                                                  // 310
+    }, {                                                                                          // 310
+      "source": "Babet",                                                                          // 311
+      "target": "Mme.Thenardier",                                                                 // 311
+      "value": 1                                                                                  // 311
+    }, {                                                                                          // 311
+      "source": "Babet",                                                                          // 312
+      "target": "Javert",                                                                         // 312
+      "value": 2                                                                                  // 312
+    }, {                                                                                          // 312
+      "source": "Babet",                                                                          // 313
+      "target": "Gavroche",                                                                       // 313
+      "value": 1                                                                                  // 313
+    }, {                                                                                          // 313
+      "source": "Babet",                                                                          // 314
+      "target": "Eponine",                                                                        // 314
+      "value": 1                                                                                  // 314
+    }, {                                                                                          // 314
+      "source": "Claquesous",                                                                     // 315
+      "target": "Thenardier",                                                                     // 315
+      "value": 4                                                                                  // 315
+    }, {                                                                                          // 315
+      "source": "Claquesous",                                                                     // 316
+      "target": "Babet",                                                                          // 316
+      "value": 4                                                                                  // 316
+    }, {                                                                                          // 316
+      "source": "Claquesous",                                                                     // 317
+      "target": "Gueulemer",                                                                      // 317
+      "value": 4                                                                                  // 317
+    }, {                                                                                          // 317
+      "source": "Claquesous",                                                                     // 318
+      "target": "Valjean",                                                                        // 318
+      "value": 1                                                                                  // 318
+    }, {                                                                                          // 318
+      "source": "Claquesous",                                                                     // 319
+      "target": "Mme.Thenardier",                                                                 // 319
+      "value": 1                                                                                  // 319
+    }, {                                                                                          // 319
+      "source": "Claquesous",                                                                     // 320
+      "target": "Javert",                                                                         // 320
+      "value": 1                                                                                  // 320
+    }, {                                                                                          // 320
+      "source": "Claquesous",                                                                     // 321
+      "target": "Eponine",                                                                        // 321
+      "value": 1                                                                                  // 321
+    }, {                                                                                          // 321
+      "source": "Claquesous",                                                                     // 322
+      "target": "Enjolras",                                                                       // 322
+      "value": 1                                                                                  // 322
+    }, {                                                                                          // 322
+      "source": "Montparnasse",                                                                   // 323
+      "target": "Javert",                                                                         // 323
+      "value": 1                                                                                  // 323
+    }, {                                                                                          // 323
+      "source": "Montparnasse",                                                                   // 324
+      "target": "Babet",                                                                          // 324
+      "value": 2                                                                                  // 324
+    }, {                                                                                          // 324
+      "source": "Montparnasse",                                                                   // 325
+      "target": "Gueulemer",                                                                      // 325
+      "value": 2                                                                                  // 325
+    }, {                                                                                          // 325
+      "source": "Montparnasse",                                                                   // 326
+      "target": "Claquesous",                                                                     // 326
+      "value": 2                                                                                  // 326
+    }, {                                                                                          // 326
+      "source": "Montparnasse",                                                                   // 327
+      "target": "Valjean",                                                                        // 327
+      "value": 1                                                                                  // 327
+    }, {                                                                                          // 327
+      "source": "Montparnasse",                                                                   // 328
+      "target": "Gavroche",                                                                       // 328
+      "value": 1                                                                                  // 328
+    }, {                                                                                          // 328
+      "source": "Montparnasse",                                                                   // 329
+      "target": "Eponine",                                                                        // 329
+      "value": 1                                                                                  // 329
+    }, {                                                                                          // 329
+      "source": "Montparnasse",                                                                   // 330
+      "target": "Thenardier",                                                                     // 330
+      "value": 1                                                                                  // 330
+    }, {                                                                                          // 330
+      "source": "Toussaint",                                                                      // 331
+      "target": "Cosette",                                                                        // 331
+      "value": 2                                                                                  // 331
+    }, {                                                                                          // 331
+      "source": "Toussaint",                                                                      // 332
+      "target": "Javert",                                                                         // 332
+      "value": 1                                                                                  // 332
+    }, {                                                                                          // 332
+      "source": "Toussaint",                                                                      // 333
+      "target": "Valjean",                                                                        // 333
+      "value": 1                                                                                  // 333
+    }, {                                                                                          // 333
+      "source": "Child1",                                                                         // 334
+      "target": "Gavroche",                                                                       // 334
+      "value": 2                                                                                  // 334
+    }, {                                                                                          // 334
+      "source": "Child2",                                                                         // 335
+      "target": "Gavroche",                                                                       // 335
+      "value": 2                                                                                  // 335
+    }, {                                                                                          // 335
+      "source": "Child2",                                                                         // 336
+      "target": "Child1",                                                                         // 336
+      "value": 3                                                                                  // 336
+    }, {                                                                                          // 336
+      "source": "Brujon",                                                                         // 337
+      "target": "Babet",                                                                          // 337
+      "value": 3                                                                                  // 337
+    }, {                                                                                          // 337
+      "source": "Brujon",                                                                         // 338
+      "target": "Gueulemer",                                                                      // 338
+      "value": 3                                                                                  // 338
+    }, {                                                                                          // 338
+      "source": "Brujon",                                                                         // 339
+      "target": "Thenardier",                                                                     // 339
+      "value": 3                                                                                  // 339
+    }, {                                                                                          // 339
+      "source": "Brujon",                                                                         // 340
+      "target": "Gavroche",                                                                       // 340
+      "value": 1                                                                                  // 340
+    }, {                                                                                          // 340
+      "source": "Brujon",                                                                         // 341
+      "target": "Eponine",                                                                        // 341
+      "value": 1                                                                                  // 341
+    }, {                                                                                          // 341
+      "source": "Brujon",                                                                         // 342
+      "target": "Claquesous",                                                                     // 342
+      "value": 1                                                                                  // 342
+    }, {                                                                                          // 342
+      "source": "Brujon",                                                                         // 343
+      "target": "Montparnasse",                                                                   // 343
+      "value": 1                                                                                  // 343
+    }, {                                                                                          // 343
+      "source": "Mme.Hucheloup",                                                                  // 344
+      "target": "Bossuet",                                                                        // 344
+      "value": 1                                                                                  // 344
+    }, {                                                                                          // 344
+      "source": "Mme.Hucheloup",                                                                  // 345
+      "target": "Joly",                                                                           // 345
+      "value": 1                                                                                  // 345
+    }, {                                                                                          // 345
+      "source": "Mme.Hucheloup",                                                                  // 346
+      "target": "Grantaire",                                                                      // 346
+      "value": 1                                                                                  // 346
+    }, {                                                                                          // 346
+      "source": "Mme.Hucheloup",                                                                  // 347
+      "target": "Bahorel",                                                                        // 347
+      "value": 1                                                                                  // 347
+    }, {                                                                                          // 347
+      "source": "Mme.Hucheloup",                                                                  // 348
+      "target": "Courfeyrac",                                                                     // 348
+      "value": 1                                                                                  // 348
+    }, {                                                                                          // 348
+      "source": "Mme.Hucheloup",                                                                  // 349
+      "target": "Gavroche",                                                                       // 349
+      "value": 1                                                                                  // 349
+    }, {                                                                                          // 349
+      "source": "Mme.Hucheloup",                                                                  // 350
+      "target": "Enjolras",                                                                       // 350
+      "value": 1                                                                                  // 350
+    }]                                                                                            // 350
+  };                                                                                              // 16
+  var link = svg.append("g").attr("class", "links").selectAll("line").data(graph.links).enter().append("line").attr("stroke-width", function (d) {
+    return Math.sqrt(d.value);                                                                    // 359
+  });                                                                                             // 359
+  var node = svg.append("g").attr("class", "nodes").selectAll("circle").data(graph.nodes).enter().append("circle").attr("r", 5).attr("fill", function (d) {
+    return color(d.group);                                                                        // 367
+  }).call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));           // 367
+  node.append("title").text(function (d) {                                                        // 373
+    return d.id;                                                                                  // 374
+  });                                                                                             // 374
+  simulation.nodes(graph.nodes).on("tick", ticked);                                               // 376
+  simulation.force("link").links(graph.links);                                                    // 380
+                                                                                                  //
+  function ticked() {                                                                             // 383
+    link.attr("x1", function (d) {                                                                // 384
+      return d.source.x;                                                                          // 385
+    }).attr("y1", function (d) {                                                                  // 385
+      return d.source.y;                                                                          // 386
+    }).attr("x2", function (d) {                                                                  // 386
+      return d.target.x;                                                                          // 387
+    }).attr("y2", function (d) {                                                                  // 387
+      return d.target.y;                                                                          // 388
+    });                                                                                           // 388
+    node.attr("cx", function (d) {                                                                // 390
+      return d.x;                                                                                 // 391
+    }).attr("cy", function (d) {                                                                  // 391
+      return d.y;                                                                                 // 392
+    });                                                                                           // 392
+  }                                                                                               // 393
+                                                                                                  //
+  function dragstarted(d) {                                                                       // 395
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();                                  // 396
+    d.fx = d.x;                                                                                   // 397
+    d.fy = d.y;                                                                                   // 398
+  }                                                                                               // 399
+                                                                                                  //
+  function dragged(d) {                                                                           // 401
+    d.fx = d3.event.x;                                                                            // 402
+    d.fy = d3.event.y;                                                                            // 403
+  }                                                                                               // 404
+                                                                                                  //
+  function dragended(d) {                                                                         // 406
+    if (!d3.event.active) simulation.alphaTarget(0);                                              // 407
+    d.fx = null;                                                                                  // 408
+    d.fy = null;                                                                                  // 409
+  }                                                                                               // 410
+};                                                                                                // 411
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }]}},{"extensions":[".js",".json",".html",".css"]});
 require("./client/template.main.js");
